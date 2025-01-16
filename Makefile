@@ -1,8 +1,8 @@
-build:
-    go build -o bin/kv ./
+build: 
+	go build -o bin/lv ./
 
 run:
-    ./bin/kv
+	./bin/kv
 
 test:
-    go test ./ -v
+	go test ./ -v
