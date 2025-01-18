@@ -55,16 +55,20 @@ func (s *KVStore[K, V]) Update(key K, val V) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	if !s.Has(key) {
+		return fmt.Errorf("Key %v does not have a value", key)
+	}
 	s.data[key] = val
 	return nil
 }
 
 // Delete and clear cool
 func (s *KVStore[K, V]) Delete(key K) (V, error) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
 	v, err := s.Get(key)
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	if err != nil {
 		var v V
 		return v, fmt.Errorf("Value not found on key %v", key)
@@ -79,4 +83,9 @@ func (s *KVStore[K, V]) Clear() {
 	defer s.mu.Unlock()
 
 	clear(s.data)
+}
+
+func (s *KVStore[K, V]) Has(key K) bool {
+	_, ok := s.data[key]
+	return ok
 }

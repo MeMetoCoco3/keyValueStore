@@ -1,23 +1,50 @@
 package main
 
-import "fmt"
-
 func main() {
-	s := NewKVStore[int, string]()
+	s := NewServer(":1337")
 
-	s.Put(43, "Fortythree")
+	u1 := NewUser("Vidal", "Macho", 28)
+	u2 := NewUser("Alice", "Fierce", 25)
+	u3 := NewUser("Bob", "Brave", 30)
+	u4 := NewUser("Charlie", "Swift", 22)
+	u5 := NewUser("Diana", "Strong", 27)
+	u6 := NewUser("Ethan", "Clever", 35)
+	u7 := NewUser("Fiona", "Bold", 26)
+	u8 := NewUser("George", "Quick", 29)
+	u9 := NewUser("Hannah", "Kind", 31)
+	u10 := NewUser("Isaac", "Loyal", 24)
+	u11 := NewUser("Julia", "Smart", 28)
+	u12 := NewUser("Kevin", "Sharp", 33)
+	u13 := NewUser("Laura", "Fearless", 21)
+	u14 := NewUser("Mike", "Steady", 34)
+	u15 := NewUser("Nina", "Happy", 23)
+	u16 := NewUser("Oscar", "Calm", 32)
+	u17 := NewUser("Paula", "Wise", 26)
+	u18 := NewUser("Quentin", "Energetic", 29)
+	u19 := NewUser("Rachel", "Brilliant", 30)
+	u20 := NewUser("Sam", "Resilient", 27)
 
-	v, err := s.Get(43)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(v)
+	s.Storage.Put(1, u1)
+	s.Storage.Put(2, u2)
+	s.Storage.Put(3, u3)
+	s.Storage.Put(4, u4)
+	s.Storage.Put(5, u5)
+	s.Storage.Put(6, u6)
+	s.Storage.Put(7, u7)
+	s.Storage.Put(8, u8)
+	s.Storage.Put(9, u9)
+	s.Storage.Put(10, u10)
+	s.Storage.Put(11, u11)
+	s.Storage.Put(12, u12)
+	s.Storage.Put(13, u13)
+	s.Storage.Put(14, u14)
+	s.Storage.Put(15, u15)
+	s.Storage.Put(16, u16)
+	s.Storage.Put(17, u17)
+	s.Storage.Put(18, u18)
+	s.Storage.Put(19, u19)
+	s.Storage.Put(20, u20)
 
-	val, err := s.Delete(43)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Println(val)
+	s.StartServer()
 
 }
