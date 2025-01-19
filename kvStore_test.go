@@ -91,7 +91,7 @@ func TestKVStore(t *testing.T) {
 	}
 	// Iter Nonexistent key
 	_, err = store1.Iter("NonexistentKey")
-	if err != nil {
+	if err == nil {
 		t.Errorf("Iter failed: We found nonexistent key in map: %v", err)
 	}
 
