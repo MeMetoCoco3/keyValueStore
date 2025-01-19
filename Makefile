@@ -1,5 +1,5 @@
 build: 
-	go build -o bin/lv ./
+	go build -o bin/kv
 
 run:
 	./bin/kv

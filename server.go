@@ -45,7 +45,14 @@ func (s *Server) StartServer() {
 
 func (s *Server) HandlePut(w http.ResponseWriter, r *http.Request) {
 	var buff bytes.Buffer
-	err := IssueList.Execute(&buff, s.Storage.data)
+
+	// TODO:ALSO DO TEST
+	list, err := s.Storage.Iter(1, 2, 3, 6, 7)
+	if err != nil {
+		log.Fatalf("We got error %v", err)
+	}
+
+	err = IssueList.Execute(&buff, list)
 	if err != nil {
 		log.Fatalf("We got error %v", err)
 	}
@@ -55,6 +62,6 @@ func (s *Server) HandlePut(w http.ResponseWriter, r *http.Request) {
 }
 
 type Server struct {
-	Storage    *KVStore[int, *User]
+	Storage    Storer[int, *User]
 	ListenAddr string
 }

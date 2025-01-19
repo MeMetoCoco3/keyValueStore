@@ -12,6 +12,7 @@ type Storer[K comparable, V any] interface {
 	Get(K) (V, error)
 	Update(K, V) error
 	Delete(K) (V, error)
+	Iter(...K) ([]V, error)
 }
 
 type KVStore[K comparable, V any] struct {
@@ -88,4 +89,20 @@ func (s *KVStore[K, V]) Clear() {
 func (s *KVStore[K, V]) Has(key K) bool {
 	_, ok := s.data[key]
 	return ok
+}
+
+func (s *KVStore[K, V]) Iter(keys ...K) ([]V, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	result := make([]V, len(keys))
+	for i, k := range keys {
+		if v, ok := s.data[k]; !ok {
+			return nil, fmt.Errorf("Key: %v not present in data storage.", k)
+		} else {
+			result[i] = v
+		}
+	}
+	return result, nil
+
 }

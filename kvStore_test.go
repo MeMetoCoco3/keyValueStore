@@ -22,13 +22,13 @@ func TestKVStore(t *testing.T) {
 	// Put Duplicate key
 	err = store1.Put("key1", 200)
 	if err == nil {
-		t.Errorf("Put should have failed for duplicate key")
+		t.Errorf("Put failed: put duplicate key")
 	}
 
 	// Get Nonexistent Key
 	_, err = store1.Get("key2")
 	if err == nil {
-		t.Errorf("Get should have failed for non-existent key")
+		t.Errorf("Get failed: got non-existent key")
 	}
 
 	// Update
@@ -42,13 +42,9 @@ func TestKVStore(t *testing.T) {
 	}
 
 	// Update Nonexistent key
-	err = store1.Update("key1", 300)
-	if err != nil {
-		t.Errorf("We updated non existent key: %v", err)
-	}
-
-	if err != nil {
-		t.Errorf("Update failed: %v", err)
+	err = store1.Update("key3", 300)
+	if err == nil {
+		t.Errorf("Updated failed: updated non existent key: %v", err)
 	}
 
 	// Delete
@@ -60,17 +56,43 @@ func TestKVStore(t *testing.T) {
 	// Delete Nonexistent key
 	_, err = store1.Delete("key1")
 	if err == nil {
-		t.Errorf("Delete should have failed for non-existent key")
+		t.Errorf("Delete failed: Deleted non-existent key")
 	}
 
 	// Has
 	store1.Put("key1", 500)
 	if ok := store1.Has("key1"); !ok {
-		t.Errorf("Store has 'key1'")
+		t.Errorf("Has failed: Store has 'key1'")
 	}
 
 	if ok := store1.Has("We do not have this key"); ok {
-		t.Errorf("We do not have this key")
+		t.Errorf("Has failed: We do not have this key")
+	}
+
+	// Iter
+	store1.Put("key0", 0)
+	store1.Put("key1", 1)
+	store1.Put("key2", 2)
+	store1.Put("key3", 3)
+	store1.Put("key4", 4)
+	store1.Put("key5", 5)
+
+	keys := []string{"key0", "key3", "key5"}
+	expected := []int{0, 3, 5}
+	list, err := store1.Iter(keys...)
+	if err != nil {
+		t.Errorf("Iter failed: %v", err)
+	}
+
+	for i := 0; i < len(list); i++ {
+		if list[i] != expected[i] {
+			t.Errorf("Iter failed: We were expecting %v, we got %v", expected, list)
+		}
+	}
+	// Iter Nonexistent key
+	_, err = store1.Iter("NonexistentKey")
+	if err != nil {
+		t.Errorf("Iter failed: We found nonexistent key in map: %v", err)
 	}
 
 	// Clear
