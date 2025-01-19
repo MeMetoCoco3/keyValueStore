@@ -45,6 +45,6 @@ func main() {
 	s.Storage.Put(19, u19)
 	s.Storage.Put(20, u20)
 
-	s.StartServer()
+	s.StartEcho()
 
 }
