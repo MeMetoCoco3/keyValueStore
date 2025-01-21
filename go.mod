@@ -1,4 +1,4 @@
-module github.com/MeMetoCoco3/keyValueStore.git
+module github.com/MeMetoCoco3/keyValueStore
 
 go 1.23.4
 
