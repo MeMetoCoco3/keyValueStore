@@ -21,14 +21,14 @@ func (s *Server) StartEcho() {
 func (s *Server) HandlePutEcho(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		log.Fatalf("Error making conversion: %v", err)
+		log.Println("Error making conversion: %v", err)
 		return err
 	}
 
 	name := c.Param("name")
 	age, err := strconv.Atoi(c.Param("age"))
 	if err != nil {
-		log.Fatalf("Error making conversion: %v", err)
+		log.Println("Error making conversion: %v", err)
 		return err
 	}
 
@@ -43,19 +43,19 @@ func (s *Server) HandlePutEcho(c echo.Context) error {
 func (s *Server) HandleGetEcho(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		log.Fatalf("Error making conversion: %v", err)
+		log.Println("Error making conversion: %v", err)
 		return err
 	}
 
 	user, err := s.Storage.Get(id)
 	if err != nil {
-		log.Fatalf("%v", err)
+		log.Println("%v", err)
 		return err
 	}
 
 	buff, err := json.Marshal(user)
 	if err != nil {
-		log.Fatalf("%v", err)
+		log.Println("%v", err)
 		return err
 	}
 

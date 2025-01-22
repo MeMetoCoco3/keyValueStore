@@ -30,6 +30,7 @@ func NewKVStore[K comparable, V any]() *KVStore[K, V] {
 
 func (s *KVStore[K, V]) Put(key K, val V) error {
 	s.mu.Lock()
+
 	defer s.mu.Unlock()
 
 	if v, ok := s.data[key]; ok {

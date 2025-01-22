@@ -1,8 +1,14 @@
 package main
 
-func main() {
-	s := NewServer(":1337")
+import (
+	"log"
+)
 
+func main() {
+	s, err := NewBoltServer("Bunny.db", ":1337")
+	if err != nil {
+		log.Fatalln(err)
+	}
 	u1 := NewUser("Vidal", "Macho", 28)
 	u2 := NewUser("Alice", "Fierce", 25)
 	u3 := NewUser("Bob", "Brave", 30)
@@ -24,27 +30,30 @@ func main() {
 	u19 := NewUser("Rachel", "Brilliant", 30)
 	u20 := NewUser("Sam", "Resilient", 27)
 
-	s.Storage.Put(1, u1)
-	s.Storage.Put(2, u2)
-	s.Storage.Put(3, u3)
-	s.Storage.Put(4, u4)
-	s.Storage.Put(5, u5)
-	s.Storage.Put(6, u6)
-	s.Storage.Put(7, u7)
-	s.Storage.Put(8, u8)
-	s.Storage.Put(9, u9)
-	s.Storage.Put(10, u10)
-	s.Storage.Put(11, u11)
-	s.Storage.Put(12, u12)
-	s.Storage.Put(13, u13)
-	s.Storage.Put(14, u14)
-	s.Storage.Put(15, u15)
-	s.Storage.Put(16, u16)
-	s.Storage.Put(17, u17)
-	s.Storage.Put(18, u18)
-	s.Storage.Put(19, u19)
-	s.Storage.Put(20, u20)
+	s.Storage.PutB(1, u1)
+	s.Storage.PutB(2, u2)
+	s.Storage.PutB(3, u3)
+	s.Storage.PutB(4, u4)
+	s.Storage.PutB(5, u5)
+	s.Storage.PutB(6, u6)
+	s.Storage.PutB(7, u7)
+	s.Storage.PutB(8, u8)
+	s.Storage.PutB(9, u9)
+	s.Storage.PutB(10, u10)
+	s.Storage.PutB(11, u11)
+	s.Storage.PutB(12, u12)
+	s.Storage.PutB(13, u13)
+	s.Storage.PutB(14, u14)
+	s.Storage.PutB(15, u15)
+	s.Storage.PutB(16, u16)
+	s.Storage.PutB(17, u17)
+	s.Storage.PutB(18, u18)
+	s.Storage.PutB(19, u19)
+	s.Storage.PutB(20, u20)
 
-	s.StartEcho()
+	log.Println(s.ListenAddr)
+	if err := s.StartBoltEcho(); err != nil {
+		log.Fatal(err)
+	}
 
 }

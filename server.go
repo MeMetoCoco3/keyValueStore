@@ -30,6 +30,11 @@ var IssueList = template.
 	</table>
 		`))
 
+type Server struct {
+	Storage    Storer[int, *User]
+	ListenAddr string
+}
+
 func NewServer(lAddr string) *Server {
 	return &Server{
 		Storage:    NewKVStore[int, *User](),
@@ -46,7 +51,6 @@ func (s *Server) StartServer() {
 func (s *Server) HandlePut(w http.ResponseWriter, r *http.Request) {
 	var buff bytes.Buffer
 
-	// TODO:ALSO DO TEST
 	list, err := s.Storage.Iter(1, 2, 3, 6, 7)
 	if err != nil {
 		log.Fatalf("We got error %v", err)
@@ -59,9 +63,4 @@ func (s *Server) HandlePut(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write(buff.Bytes())
-}
-
-type Server struct {
-	Storage    Storer[int, *User]
-	ListenAddr string
 }
