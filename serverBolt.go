@@ -13,7 +13,7 @@ type BoltServer[K comparable, V any] struct {
 
 // Constructors cannot work with generics
 func NewBoltServer(boltPath, lAddr string) (*BoltServer[int, *User], error) {
-	boltStore, err := NewBoltStore[int, *User](boltPath)
+	boltStore, err := NewBoltStore[int, *User](boltPath, "Bunny")
 	if err != nil {
 		return nil, fmt.Errorf("Error creating new bolt server. %v", err)
 	}

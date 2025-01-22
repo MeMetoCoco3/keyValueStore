@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"sync"
-
 	bolt "go.etcd.io/bbolt"
+	"log"
+	"sync"
 )
 
 type BoltStorer[K comparable, V any] interface {
@@ -20,41 +20,17 @@ type BoltStore[K comparable, V any] struct {
 	mu             sync.RWMutex
 	data           map[K]V
 	db             *bolt.DB
-	bucket         *bolt.Bucket //Bucket name
+	bucket         []byte //Bucket name
 }
 
-/*
-	type Storer[K comparable, V any] interface {
-		Put(K, V) error
-		Get(K) (V, error)
-		Update(K, V) error
-		Delete(K) (V, error)
-		Iter(...K) ([]V, error)
-	}
-
-	func (s *BoltStore[K, V]) Put(key K, val V) error {
-		fmt.Println(s)
-		s.mu.Lock()
-		fmt.Println("PresegmentationFault")
-
-		defer s.mu.Unlock()
-
-		if v, ok := s.data[key]; ok {
-			return fmt.Errorf("Found Val: %v on Key: %v", v, key)
-		}
-		s.data[key] = val
-		return nil
-	}
-*/
-func NewBoltStore[K comparable, V any](path string) (*BoltStore[K, V], error) {
+func NewBoltStore[K comparable, V any](path, bucketName string) (*BoltStore[K, V], error) {
 	db, err := bolt.Open(path, 0600, nil)
 	if err != nil {
 		return nil, fmt.Errorf("Got error opening DB: %s", err)
 	}
 
-	var bucket *bolt.Bucket
 	if err = db.Update(func(tx *bolt.Tx) error {
-		bucket, err = tx.CreateBucketIfNotExists([]byte("Bunny"))
+		_, err = tx.CreateBucketIfNotExists([]byte(bucketName))
 		if err != nil {
 			return fmt.Errorf("Error creating bucket: %s \n", err)
 		}
@@ -67,7 +43,7 @@ func NewBoltStore[K comparable, V any](path string) (*BoltStore[K, V], error) {
 		mu:     sync.RWMutex{},
 		data:   make(map[K]V),
 		db:     db,
-		bucket: bucket,
+		bucket: []byte(bucketName),
 	}, nil
 }
 
@@ -102,7 +78,7 @@ func (b *BoltStore[K, V]) PutB(key K, val V) error {
 		return fmt.Errorf("Error using Put from Boltstore:, %s", err)
 	}
 
-	keyBytes, err := json.Marshal(val)
+	keyBytes, err := json.Marshal(key)
 	if err != nil {
 		return fmt.Errorf("Error converting key %s into json format:, %s", key, err)
 	}
@@ -111,21 +87,22 @@ func (b *BoltStore[K, V]) PutB(key K, val V) error {
 	if err != nil {
 		return fmt.Errorf("Error converting value %s into json format:, %s", val, err)
 	}
-
 	if err = b.db.Update(func(tx *bolt.Tx) error {
-		err = b.bucket.Put(keyBytes, valueBytes)
+		bucket := tx.Bucket([]byte("Bunny"))
+		err = bucket.Put(keyBytes, valueBytes)
 		if err != nil {
-			return fmt.Errorf("Error putting Key:%s Val: %s in bucket. %s", key, val, err)
+			return fmt.Errorf("Error putting Key:%v Val: %+v in bucket. %s", key, val, err)
 		}
 
 		return nil
 	}); err != nil {
-		return fmt.Errorf("Error putting Key:%s Val: %s in bucket.", key, val)
+		return fmt.Errorf("Error putting Key:%v Val: %+v in bucket.", key, val)
 	}
 	return nil
 }
 
 func (b *BoltStore[K, V]) GetB(key K) (V, error) {
+
 	var v V
 	var val []byte
 
@@ -133,15 +110,18 @@ func (b *BoltStore[K, V]) GetB(key K) (V, error) {
 	if err != nil {
 		return v, fmt.Errorf("Error marshalling key '%s' on GetB. %s", key, err)
 	}
-
 	if err = b.db.View(func(tx *bolt.Tx) error {
-		val = b.bucket.Get(keyBytes)
+		bucket := tx.Bucket([]byte("Bunny"))
+		log.Println(bucket)
+		val = bucket.Get(keyBytes)
+		if val == nil {
+			return fmt.Errorf("Key %v not found", key)
+		}
 		return nil
 	}); err != nil {
 		return v, fmt.Errorf("Error on get transaction. %s", err)
 	}
-
-	err = json.Unmarshal(val, v)
+	err = json.Unmarshal(val, &v)
 	if err != nil {
 		return v, fmt.Errorf("Err1or on get transaction. %s, %s", err, val)
 	}

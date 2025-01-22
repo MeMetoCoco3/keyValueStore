@@ -29,10 +29,14 @@ func main() {
 	u18 := NewUser("Quentin", "Energetic", 29)
 	u19 := NewUser("Rachel", "Brilliant", 30)
 	u20 := NewUser("Sam", "Resilient", 27)
+	err = s.Storage.PutB(1, u1)
+	log.Println(err)
+	err = s.Storage.PutB(2, u2)
 
-	s.Storage.PutB(1, u1)
-	s.Storage.PutB(2, u2)
-	s.Storage.PutB(3, u3)
+	log.Println(err)
+	err = s.Storage.PutB(3, u3)
+
+	log.Println(err)
 	s.Storage.PutB(4, u4)
 	s.Storage.PutB(5, u5)
 	s.Storage.PutB(6, u6)
@@ -50,10 +54,13 @@ func main() {
 	s.Storage.PutB(18, u18)
 	s.Storage.PutB(19, u19)
 	s.Storage.PutB(20, u20)
+	v, err := s.Storage.GetB(17)
+	log.Println(v)
+	log.Println(err)
+	data, err := s.Storage.GetAll()
 
-	log.Println(s.ListenAddr)
-	if err := s.StartBoltEcho(); err != nil {
-		log.Fatal(err)
+	for k, v := range data {
+		log.Println("GETALL:", k, v)
+
 	}
-
 }
