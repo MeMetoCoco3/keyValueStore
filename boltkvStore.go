@@ -12,6 +12,7 @@ type BoltStorer[K comparable, V any] interface {
 	Storer[K, V]
 	PutB(K, V) error
 	GetB(K) (V, error)
+	DeleteB(K) (V, error)
 	GetAll() (map[K]V, error)
 }
 
@@ -47,29 +48,75 @@ func NewBoltStore[K comparable, V any](path, bucketName string) (*BoltStore[K, V
 	}, nil
 }
 
-func (s *BoltStore[K, V]) Put(key K, val V) error {
-	s.mu.Lock()
+func (b *BoltStore[K, V]) Put(key K, val V) error {
+	b.mu.Lock()
 
-	defer s.mu.Unlock()
+	defer b.mu.Unlock()
 
-	if v, ok := s.data[key]; ok {
+	if v, ok := b.data[key]; ok {
 		return fmt.Errorf("Found Val: %v on Key: %v", v, key)
 	}
-	s.data[key] = val
+	b.data[key] = val
 	return nil
 }
 
-func (s *BoltStore[K, V]) Get(key K) (V, error) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
+func (b *BoltStore[K, V]) Get(key K) (V, error) {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
 
-	if v, ok := s.data[key]; !ok {
+	if v, ok := b.data[key]; !ok {
 		// Cuidao, null value
 		var v V
 		return v, fmt.Errorf("Value not found on key %v", key)
 	} else {
 		return v, nil
 	}
+}
+
+func (b *BoltStore[K, V]) Delete(key K) (V, error) {
+	v, err := b.Get(key)
+
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	if err != nil {
+		var v V
+		return v, fmt.Errorf("Value not found on key %v", key)
+	}
+
+	delete(b.data, key)
+	return v, nil
+}
+
+func (b *BoltStore[K, V]) DeleteB(key K) (V, error) {
+	var v V
+	var userBytes []byte
+	_, err := b.Delete(key)
+	if err != nil {
+		return v, err
+	}
+
+	keyBytes, err := json.Marshal(key)
+	if err != nil {
+		return v, err
+	}
+	if err := b.db.Update(func(tx *bolt.Tx) error {
+		log.Println("The name of the bucket is: %s", b.bucket)
+		bucket := tx.Bucket(b.bucket)
+		userBytes = bucket.Get(keyBytes)
+		if userBytes == nil {
+			return fmt.Errorf("User with key %s was not found", key)
+		}
+		return bucket.Delete(keyBytes)
+	}); err != nil {
+		return v, err
+	}
+
+	if err = json.Unmarshal(userBytes, &v); err != nil {
+		return v, err
+	}
+
+	return v, nil
 }
 
 func (b *BoltStore[K, V]) PutB(key K, val V) error {
@@ -102,7 +149,6 @@ func (b *BoltStore[K, V]) PutB(key K, val V) error {
 }
 
 func (b *BoltStore[K, V]) GetB(key K) (V, error) {
-
 	var v V
 	var val []byte
 

@@ -30,6 +30,6 @@ func (s *BoltServer[K, V]) StartBoltEcho() error {
 	e.GET("/put/:id/:name/:age/:role", s.HandlePutEcho)
 	e.GET("/get/:id", s.HandleGetEcho)
 	e.GET("/getAll", s.HandleGetAllEcho)
-
+	e.DELETE("/delete/:id", s.HandleDeleteEcho)
 	return e.Start(s.ListenAddr)
 }

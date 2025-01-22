@@ -57,10 +57,8 @@ func main() {
 	v, err := s.Storage.GetB(17)
 	log.Println(v)
 	log.Println(err)
-	data, err := s.Storage.GetAll()
 
-	for k, v := range data {
-		log.Println("GETALL:", k, v)
-
+	if err := s.StartBoltEcho(); err != nil {
+		log.Println("Error spining server. %s", err)
 	}
 }
